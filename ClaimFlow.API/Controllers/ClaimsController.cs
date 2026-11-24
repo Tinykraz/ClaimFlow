@@ -93,4 +93,19 @@ public ActionResult UpdateClaimStatus(
     });
 }
 
+[HttpGet("{id:guid}/history")]
+public ActionResult<List<ClaimStatusHistory>> GetClaimStatusHistory(Guid id)
+{
+    var claim = _claimService.GetClaimById(id);
+
+    if (claim == null)
+    {
+        return NotFound(new { Message = "Claim not found." });
+    }
+
+    var history = _claimService.GetClaimStatusHistory(id);
+
+    return Ok(history);
+}
+
 }

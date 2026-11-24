@@ -6,6 +6,15 @@ namespace ClaimFlow.API.Services;
 public class ClaimService
 {
     private readonly List<Claim> _claims = new();
+    private readonly List<ClaimStatusHistory> _statusHistory = new();
+
+    public List<ClaimStatusHistory> GetClaimStatusHistory(Guid claimId)
+{
+    return _statusHistory
+        .Where(history => history.ClaimId == claimId)
+        .OrderBy(history => history.ChangedAtUtc)
+        .ToList();
+}
 
     public List<Claim> GetAllClaims()
     {
@@ -39,7 +48,20 @@ public bool UpdateClaimStatus(Guid id, ClaimStatus newStatus)
         return false;
     }
 
+    var previousStatus = claim.Status;
+
     claim.Status = newStatus;
+
+    var history = new ClaimStatusHistory
+    {
+        ClaimId = claim.Id,
+        PreviousStatus = previousStatus,
+        NewStatus = newStatus,
+        ChangedAtUtc = DateTime.UtcNow,
+        ChangedBy = "System"
+    };
+
+    _statusHistory.Add(history);
 
     return true;
 }
